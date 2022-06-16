@@ -16,5 +16,6 @@
   "devDependencies": {
     "eslint": "^8.16.0"
   },
-  "type": "module"
+  "type": "module",
+  "start": "node index.js"
 }
