@@ -2,7 +2,7 @@ import service from "../services/recipes.service.js";
 
 async function getRecipeList(req, res, next) {
   try {
-    const result = await service.getRecipeList();
+    const result = await service.getRecipeList(req.query);
     res.send(result);
   } catch (e) {
     next(e);
@@ -20,7 +20,7 @@ async function getRecipeById(req, res, next) {
 
 async function addRecipe(req, res, next) {
   try {
-    const result = await service.addRecipe(req.body);
+    const result = await service.addRecipe(req.body, req.file);
     res.send(result);
   } catch (e) {
     next(e);

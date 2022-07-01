@@ -9,12 +9,17 @@ app.get("/", (req, res) => {
 });
 
 app.use(express.json());
+app.use("/images", express.static('./src/images'));
 app.use("/api/recipes", recipesRouter);
 app.use(errorHarndler);
+
+app.all('*', function(req, res) {
+  res.redirect("/");
+});
 
 const port = 3000;
 app.listen(port, () => {
   console.log(`Running on port ${port}.`);
 });
 
-export default app
+export default app;
