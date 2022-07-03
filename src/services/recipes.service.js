@@ -7,7 +7,7 @@ const { Client } = pg;
 async function getRecipeList(query) {
   const client = createClient();
   await client.connect();
-  let queryString = "Select id, name from recipes";
+  let queryString = "Select id, name, country from recipes";
   if (Object.entries(query).length > 0) {
     queryString += " where";
     if (query.name) queryString += ` name ilike '${query.name}%'`;
@@ -41,7 +41,7 @@ async function addRecipe(recipe, image) {
     throwError("Couldn't create a new recipe. Invalid data provided.", 400);
   const client = createClient();
   await client.connect();
-  const result = await client.query(`Insert into recipes (name, country, ingredients, instructions, creator_id ${
+  const result = await client.query(`Insert into recipes (name, country, ingredients, instructions, creatorId ${
     image ? ", image" : ""
   }) 
 values ('${recipe.name}', '${recipe.country}', '${recipe.ingredients}', '${

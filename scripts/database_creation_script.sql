@@ -7,11 +7,11 @@ name VARCHAR(255) NOT NULL,
 country VARCHAR(255) NOT NULL,
 ingredients TEXT NOT NULL,
 instructions TEXT NOT NULL,
-creator_id VARCHAR(255) NOT NULL,
+creatorId VARCHAR(255) NOT NULL,
 image BYTEA
 );
 
-INSERT INTO recipes (name, country, ingredients, instructions, creator_id, image) VALUES
+INSERT INTO recipes (name, country, ingredients, instructions, creatorId, image) VALUES
 (
 	'Classic Lasagna', 
  	'Italy', 
