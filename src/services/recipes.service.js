@@ -1,7 +1,7 @@
 import databaseConfig from "../configs/database.config.js";
 import pg from "pg";
 import Joi from "joi";
-
+import { Buffer } from "buffer";
 const { Client } = pg;
 
 async function getRecipeList(query) {
@@ -22,9 +22,17 @@ async function getRecipeById(id) {
   const client = createClient();
   await client.connect();
   const result = await client.query(`Select * from recipes where id = ${id}`);
-  if (result.rowCount == 0)
-    throwError(`Element with id ${id} couldn't be found.`, 404);
-  return result.rows;
+  if (result.rowCount == 0) throwError(`Recipe couldn't be found.`, 404);
+
+  if (result.rows[0]["image"]) {
+    result.rows[0]["image"] = Buffer.from(
+      result.rows[0]["image"],
+      "base64"
+    ).toString("binary");
+  } else {
+    delete result.rows[0]["image"];
+  }
+  return result.rows[0];
 }
 
 async function addRecipe(recipe, image) {
@@ -33,9 +41,16 @@ async function addRecipe(recipe, image) {
     throwError("Couldn't create a new recipe. Invalid data provided.", 400);
   const client = createClient();
   await client.connect();
-  const result =
-    await client.query(`Insert into recipes (name, country, ingredients, instructions, creator_id) 
-  values ('${recipe.name}', '${recipe.country}', '${recipe.ingredients}', '${recipe.instructions}', '${recipe.creatorId}') returning id`);
+  const result = await client.query(`Insert into recipes (name, country, ingredients, instructions, creator_id ${
+    image ? ", image" : ""
+  }) 
+values ('${recipe.name}', '${recipe.country}', '${recipe.ingredients}', '${
+    recipe.instructions
+  }', '${recipe.creatorId}' 
+${
+  image ? ", bytea('" + image.buffer.toString("base64") + "')" : ""
+}) returning id`);
+  await client.end();
   return result.rows[0];
 }
 
