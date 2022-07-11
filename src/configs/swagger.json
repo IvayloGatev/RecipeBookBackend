@@ -1,0 +1,324 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Recipe Book Backend",
+    "description": "A small backend server, written in Node.js, that makes it possible to perform CRUD operations to a database through a REST API. This backend is meant to be used for the sample Recipe Book application that is build as part of the Mobile Application Development course in Technische Hochshule Ulm."
+  },
+  "host": "localhost:3000",
+  "basePath": "/api",
+  "tags": [
+    {
+      "name": "Recipes",
+      "description": "API for recipes."
+    }
+  ],
+  "schemes": ["http"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/recipes": {
+      "get": {
+        "tags": ["Recipes"],
+        "summary": "Get all recipes from the database.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/RecipeForList"
+              }
+            }
+          },
+          "401": {
+            "description": "You are unauthorized."
+          }
+        },
+        "security": [
+          {
+            "basic_auth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": ["Recipes"],
+        "summary": "Add a new recipe to the database.",
+        "consumes": "multipart/form-data",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "formData",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "country",
+            "in": "formData",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "ingredients",
+            "in": "formData",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "instructions",
+            "in": "formData",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "image",
+            "in": "formData",
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "schema": {
+              "items": {
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "uniqueItems": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid data provided."
+          },
+          "401": {
+            "description": "You are unauthorized."
+          }
+        },
+        "security": [
+          {
+            "basic_auth": []
+          }
+        ]
+      }
+    },
+    "/recipes/{id}": {
+      "get": {
+        "tags": ["Recipes"],
+        "summary": "Get a recipe from the database by id.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "schema": { "$ref": "#/definitions/Recipe" }
+          },
+          "401": {
+            "description": "You are unauthorized."
+          },
+          "404": {
+            "description": "Recipe couldn't be found."
+          }
+        },
+        "security": [
+          {
+            "basic_auth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": ["Recipes"],
+        "summary": "Update an already existing recipe in the database.",
+        "consumes": "multipart/form-data",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "name",
+            "in": "formData",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "country",
+            "in": "formData",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "ingredients",
+            "in": "formData",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "instructions",
+            "in": "formData",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "image",
+            "in": "formData",
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "schema": {
+              "items": {
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "uniqueItems": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid data provided."
+          },
+          "401": {
+            "description": "You are unauthorized."
+          },
+          "403": {
+            "description": "You are not allowed to perform this operation."
+          },
+          "404": {
+            "description": "Recipe couldn't be found."
+          }
+        },
+        "security": [
+          {
+            "basic_auth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["Recipes"],
+        "summary": "Delete a recipe from the database.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "schema": {
+              "items": {
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "uniqueItems": true
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "You are unauthorized."
+          },
+          "403": {
+            "description": "You are not allowed to perform this operation."
+          },
+          "404": {
+            "description": "Recipe couldn't be found."
+          }
+        },
+        "security": [
+          {
+            "basic_auth": []
+          }
+        ]
+      }
+    }
+  },
+  "securityDefinitions": {
+    "basic_auth": {
+      "type": "basic"
+    }
+  },
+  "definitions": {
+    "RecipeForList": {
+      "required": ["id", "name", "country"],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "uniqueItems": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        }
+      }
+    },
+    "Recipe": {
+      "required": [
+        "id",
+        "name",
+        "country",
+        "ingredients",
+        "instructions",
+        "isCreator"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "uniqueItems": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        },
+        "ingredients": {
+          "type": "string"
+        },
+        "instructions": {
+          "type": "string"
+        },
+        "isCreator": {
+          "type": "boolean"
+        },
+        "image": {
+          "type": "file"
+        }
+      }
+    }
+  }
+}

@@ -1,19 +1,24 @@
 import express from "express";
 import recipesRouter from "./src/routes/recipes.route.js";
 import errorHarndler from "./src/services/error-handler.service.js";
+import swaggerUi from "swagger-ui-express";
+import { createRequire } from "module";
+
 
 const app = express();
+const require = createRequire(import.meta.url);
+const swaggerDocument = require("./src/configs/swagger.json");
 
 app.get("/", (req, res) => {
   res.json({ message: "ok" });
 });
-
 app.use(express.json());
-app.use("/images", express.static('./src/images'));
+
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api/recipes", recipesRouter);
 app.use(errorHarndler);
 
-app.all('*', function(req, res) {
+app.all("*", function (req, res) {
   res.redirect("/");
 });
 

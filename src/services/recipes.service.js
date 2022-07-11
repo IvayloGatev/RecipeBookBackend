@@ -11,69 +11,85 @@ async function getRecipeList(query) {
   if (Object.entries(query).length > 0) {
     queryString += " where";
     if (query.name) queryString += ` name ilike '${query.name}%'`;
-    else if (query.country) queryString += ` country = '${query.country}'`;
+    if (query.name && query.country) queryString += " and ";
+    if (query.country) queryString += ` country = '${query.country}'`;
   }
   const result = await client.query(queryString);
   await client.end();
   return result.rows;
 }
 
-async function getRecipeById(id) {
+async function getRecipeById(id, user) {
   const client = createClient();
   await client.connect();
   const result = await client.query(`Select * from recipes where id = ${id}`);
   if (result.rowCount == 0) throwError(`Recipe couldn't be found.`, 404);
 
-  if (result.rows[0]["image"]) {
-    result.rows[0]["image"] = Buffer.from(
-      result.rows[0]["image"],
-      "base64"
-    ).toString("binary");
+  const recipe = result.rows[0];
+  recipe["isCreator"] = recipe["creatorid"] == user ? true : false;
+  delete recipe["creatorid"];
+  if (recipe["image"]) {
+    recipe["image"] = Buffer.from(recipe["image"], "base64").toString("binary");
   } else {
-    delete result.rows[0]["image"];
+    delete recipe["image"];
   }
-  return result.rows[0];
+  return recipe;
 }
 
-async function addRecipe(recipe, image) {
+async function addRecipe(recipe, image, user) {
+  recipe["creatorId"] = user;
   const validate = validateRecipe(recipe);
-  if (validate.error)
-    throwError("Couldn't create a new recipe. Invalid data provided.", 400);
+  if (validate.error) throwError("Invalid data provided.", 400);
+
   const client = createClient();
   await client.connect();
-  const result = await client.query(`Insert into recipes (name, country, ingredients, instructions, creatorId ${
-    image ? ", image" : ""
-  }) 
+  const result =
+    await client.query(`Insert into recipes (name, country, ingredients, instructions, creatorId ${
+      image ? ", image" : ""
+    }) 
 values ('${recipe.name}', '${recipe.country}', '${recipe.ingredients}', '${
-    recipe.instructions
-  }', '${recipe.creatorId}' 
+      recipe.instructions
+    }', '${recipe.creatorId}' 
 ${
   image ? ", bytea('" + image.buffer.toString("base64") + "')" : ""
 }) returning id`);
+
   await client.end();
   return result.rows[0];
 }
 
-async function updateRecipe(id, recipe) {
-  //   const updatedRecipe = recipes.find((r) => r.id == id);
-  //   if (!updatedRecipe)
-  //     throwError(`Element with id ${id} scouldn't be found.`, 404);
-  //   updatedRecipe.name = recipe.name || updatedRecipe.name;
-  //   updatedRecipe.country = recipe.country || updatedRecipe.country;
-  //   updatedRecipe.ingredients = recipe.ingredients || updatedRecipe.ingredients;
-  //   updatedRecipe.instructions =
-  //     recipe.instructions || updatedRecipe.instructions;
-  //   const result = validateRecipe(updatedRecipe);
-  //   if (result.error)
-  //     throwError("Couldn't update recipe. Invalid data provided.", 400);
-  //   return updatedRecipe;
+async function updateRecipe(id, recipe, image, user) {
+  recipe["creatorId"] = user;
+  const validate = validateRecipe(recipe);
+  if (validate.error) throwError("Invalid data provided.", 400);
+
+  const client = createClient();
+  await client.connect();
+  await checkPermission(client, id, user);
+  const result = await client.query(
+    `Update recipes set name = '${recipe.name}', country = '${
+      recipe.country
+    }', ingredients = '${recipe.ingredients}', instructions = '${
+      recipe.instructions
+    }', image = ${
+      image ? "bytea('" + image.buffer.toString("base64") + "')" : "NULL"
+    } where id = ${id} returning id`
+  );
+
+  await client.end();
+  return result.rows[0];
 }
 
-async function deleteRecipe(id) {
-  //   const recipe = await getRecipeById(id);
-  //   const index = recipes.indexOf(recipe);
-  //   recipes.splice(index, 1);
-  //   return recipe;
+async function deleteRecipe(id, user) {
+  const client = createClient();
+  await client.connect();
+  await checkPermission(client, id, user)
+  const result = await client.query(
+    `delete from recipes where id = ${id} returning id`
+  );
+
+  await client.end();
+  return result.rows[0];
 }
 
 function createClient() {
@@ -88,9 +104,17 @@ function createClient() {
   return client;
 }
 
+async function checkPermission(client, id, user) {
+  const result = await client.query(
+    `Select creatorid from recipes where id = ${id}`
+  );
+  if (result.rowCount == 0) throwError(`Recipe couldn't be found.`, 404);
+  else if(result.rows[0].creatorid !== user) throwError("You are not allowed to perform this operation.", 403);
+}
+
 function throwError(message, status) {
   const error = new Error(message);
-  error.status = status | 500;
+  error.status = status || 500;
   throw error;
 }
 
@@ -114,5 +138,6 @@ const service = {
   addRecipe,
   updateRecipe,
   deleteRecipe,
+  throwError,
 };
 export default service;
