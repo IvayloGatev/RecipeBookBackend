@@ -103,10 +103,6 @@ paths:
       responses:
         '200':
           description: OK
-          content: 
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Id'
         '400':
           $ref: '#/components/responses/400Error'
         '401':
@@ -130,10 +126,6 @@ paths:
       responses:
         '200':
           description: OK
-          content: 
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Id'
         '401':
           $ref: '#/components/responses/401Error'
         '403':

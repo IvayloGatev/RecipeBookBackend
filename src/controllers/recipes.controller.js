@@ -37,14 +37,8 @@ async function addRecipe(req, res, next) {
 async function updateRecipe(req, res, next) {
   try {
     const user = authenticate(req);
-    const result = await service.updateRecipe(
-      req.params.id,
-      req.body,
-      req.file,
-      user
-    );
-    res.setHeader("Content-Type", "application/json");
-    res.send(result);
+    await service.updateRecipe(req.params.id, req.body, req.file, user);
+    res.send();
   } catch (e) {
     next(e);
   }
@@ -53,9 +47,8 @@ async function updateRecipe(req, res, next) {
 async function deleteRecipe(req, res, next) {
   try {
     const user = authenticate(req);
-    const result = await service.deleteRecipe(req.params.id, user);
-    res.setHeader("Content-Type", "application/json");
-    res.send(result);
+    await service.deleteRecipe(req.params.id, user);
+    res.send();
   } catch (e) {
     next(e);
   }

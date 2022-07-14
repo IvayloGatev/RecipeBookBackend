@@ -66,30 +66,24 @@ async function updateRecipe(id, recipe, image, user) {
   const client = createClient();
   await client.connect();
   await checkPermission(client, id, user);
-  const result = await client.query(
+  await client.query(
     `Update recipes set name = '${recipe.name}', country = '${
       recipe.country
     }', ingredients = '${recipe.ingredients}', instructions = '${
       recipe.instructions
     }', image = ${
       image ? "bytea('" + image.buffer.toString("base64") + "')" : "NULL"
-    } where id = ${id} returning id`
+    } where id = ${id}`
   );
-
   await client.end();
-  return result.rows[0];
 }
 
 async function deleteRecipe(id, user) {
   const client = createClient();
   await client.connect();
   await checkPermission(client, id, user);
-  const result = await client.query(
-    `delete from recipes where id = ${id} returning id`
-  );
-
+  await client.query(`delete from recipes where id = ${id}`);
   await client.end();
-  return result.rows[0];
 }
 
 function createClient() {
