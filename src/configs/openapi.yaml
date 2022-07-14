@@ -1,0 +1,248 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: Recipe Book Backend
+  description: A small backend server, written in Node.js, that makes it possible to perform CRUD operations to a database through a REST API. This backend is meant to be used for the sample Recipe Book application that is build as part of the Mobile Application Development course in Technische Hochshule Ulm.
+
+servers:
+  - url: http://localhost:3000/api
+  
+security:
+  - BasicAuth: []
+
+paths:
+  /recipes:
+    get:
+      summary: Fetch a list of recipes from the database.
+      tags:
+        - Recipes
+      parameters:
+        - name: name
+          description: Filter recipes by name.
+          in: query
+          schema:
+            type: string
+        - name: country
+          description: Filter recipes by country.
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecipeList'
+        '401':
+          $ref: '#/components/responses/401Error'
+          
+    post:
+      summary: Add a new recipe to the database.
+      tags:
+        - Recipes
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Payload'
+      responses:
+        '200':
+          description: OK
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Id'
+        '400':
+          $ref: '#/components/responses/400Error'
+        '401':
+          $ref: '#/components/responses/401Error'
+          
+  /recipes/{id}:
+    get:
+      summary: Fetch a recipe from the database.
+      tags:
+        - Recipes
+      parameters:
+        - name: id
+          description: The recipe's unique identifier.
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedRecipe'
+        '401':
+          $ref: '#/components/responses/401Error'
+        '404':
+          $ref: '#/components/responses/404Error'
+          
+    put:
+      summary: Update an already existing recipe in the database.
+      tags:
+        - Recipes
+      parameters:
+        - name: id
+          description: The recipe's unique identifier.
+          in: path
+          required: true
+          schema:
+            type: integer        
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Payload'
+      responses:
+        '200':
+          description: OK
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Id'
+        '400':
+          $ref: '#/components/responses/400Error'
+        '401':
+          $ref: '#/components/responses/401Error'
+        '403':
+          $ref: '#/components/responses/403Error'
+        '404':
+          $ref: '#/components/responses/404Error'
+          
+    delete:
+      summary: Delete a recipe from the database.
+      tags:
+        - Recipes
+      parameters:
+        - name: id
+          description: The recipe's unique identifier.
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Id'
+        '401':
+          $ref: '#/components/responses/401Error'
+        '403':
+          $ref: '#/components/responses/403Error'
+        '404':
+          $ref: '#/components/responses/404Error'          
+          
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+      
+  schemas:
+    Id:
+      type: object
+      required: 
+       - id
+      properties:
+        id:
+          type: integer
+    
+    BasicRecipe:
+      allOf:
+        - $ref: '#/components/schemas/Id'
+        - type: object
+          required:
+            - name
+            - country
+          properties:
+            name:
+              type: string
+            country:
+              type: string
+    
+    DetailedRecipe:
+      allOf:
+        - $ref: '#/components/schemas/BasicRecipe'
+        - required:
+          - ingredients
+          - instructions
+          - isCreator
+          properties:
+            ingredients:
+              type: string
+            instructions:
+              type: string
+            image:
+              type: string
+              format: binary
+            isCreator:
+              type: boolean
+
+    RecipeList:
+      type: array
+      items:
+        $ref: '#/components/schemas/BasicRecipe'
+        
+    Payload:
+      type: object
+      required:
+      - name
+      - country
+      - ingredients
+      - instructions      
+      properties:
+        name:
+          type: string
+        country:
+          type: string
+        ingredients:
+          type: string
+        instructions:
+          type: string
+        image:
+          type: string
+          format: binary
+            
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string 
+      
+  responses:
+    400Error:
+      description: Bad Request 
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    401Error:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    403Error:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+               
+    404Error:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

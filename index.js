@@ -2,12 +2,10 @@ import express from "express";
 import recipesRouter from "./src/routes/recipes.route.js";
 import errorHarndler from "./src/services/error-handler.service.js";
 import swaggerUi from "swagger-ui-express";
-import { createRequire } from "module";
-
+import YAML from "yamljs";
 
 const app = express();
-const require = createRequire(import.meta.url);
-const swaggerDocument = require("./src/configs/swagger.json");
+const swaggerDocument = YAML.load("./src/configs/openapi.yaml")
 
 app.get("/", (req, res) => {
   res.json({ message: "ok" });

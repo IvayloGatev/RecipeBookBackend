@@ -5,6 +5,7 @@ async function getRecipeList(req, res, next) {
   try {
     authenticate(req);
     const result = await service.getRecipeList(req.query);
+    res.setHeader("Content-Type", "application/json");
     res.send(result);
   } catch (e) {
     next(e);
@@ -15,6 +16,7 @@ async function getRecipeById(req, res, next) {
   try {
     const user = authenticate(req);
     const result = await service.getRecipeById(req.params.id, user);
+    res.setHeader("Content-Type", "application/json");
     res.send(result);
   } catch (e) {
     next(e);
@@ -25,6 +27,7 @@ async function addRecipe(req, res, next) {
   try {
     const user = authenticate(req);
     const result = await service.addRecipe(req.body, req.file, user);
+    res.setHeader("Content-Type", "application/json");
     res.send(result);
   } catch (e) {
     next(e);
@@ -40,6 +43,7 @@ async function updateRecipe(req, res, next) {
       req.file,
       user
     );
+    res.setHeader("Content-Type", "application/json");
     res.send(result);
   } catch (e) {
     next(e);
@@ -50,6 +54,7 @@ async function deleteRecipe(req, res, next) {
   try {
     const user = authenticate(req);
     const result = await service.deleteRecipe(req.params.id, user);
+    res.setHeader("Content-Type", "application/json");
     res.send(result);
   } catch (e) {
     next(e);
