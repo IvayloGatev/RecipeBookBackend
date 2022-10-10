@@ -5,13 +5,13 @@ info:
   description: A small backend server, written in Node.js, that makes it possible to perform CRUD operations to a database through a REST API. This backend is meant to be used for the sample Recipe Book application that is build as part of the Mobile Application Development course in Technische Hochshule Ulm.
 
 servers:
-  - url: http://localhost:3000/api
+  - url: http://localhost:3000
   
 security:
   - BasicAuth: []
 
 paths:
-  /recipes:
+  /api/recipes:
     get:
       summary: Fetch a list of recipes from the database.
       tags:
@@ -59,7 +59,7 @@ paths:
         '401':
           $ref: '#/components/responses/401Error'
           
-  /recipes/{id}:
+  /api/recipes/{id}:
     get:
       summary: Fetch a recipe from the database.
       tags:

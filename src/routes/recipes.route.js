@@ -5,13 +5,6 @@ import multer from "multer";
 const router = express.Router();
 const upload = multer();
 
-/**
- * @swagger
- * /api/recipes:
- *   get:
- *     summary: Retrieve a list of JSONPlaceholder users
- *     description: Retrieve a list of users from JSONPlaceholder. Can be used to populate a list of fake users when prototyping or testing an API.
-*/
 router.get("/", controller.getRecipeList);
 
 router.get("/:id", controller.getRecipeById);

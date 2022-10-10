@@ -7,13 +7,10 @@ import YAML from "yamljs";
 const app = express();
 const swaggerDocument = YAML.load("./src/configs/openapi.yaml")
 
-app.get("/", (req, res) => {
-  res.json({ message: "ok" });
-});
 app.use(express.json());
 
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api/recipes", recipesRouter);
+app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use(errorHarndler);
 
 app.all("*", function (req, res) {
